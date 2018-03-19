@@ -5,15 +5,17 @@
 const fs = require('fs');
 
 function fileCache() {
+    var map = new Map();
     this.filePath = path.join(_dirname,'filecache');
 
+    this.
     this.cache = function (key,object,timeout) {
         var objectPath = path.join(this.getPath(key),key);
-
     };
     
     this.take = function (key) {
         var fs = require('fs');
+        fs.readFile()
     }
 
     this.getPath = function (key) {

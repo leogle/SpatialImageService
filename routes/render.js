@@ -4,13 +4,22 @@
 var express = require('express');
 var router = express.Router();
 const RenderService = require('../service/RenderService');
+const map = new Map();
 
 router.get('/spa', function(req, res) {
     console.log('render/statial');
+    var fnv = require('fnv-plus');
+    var hash = fnv.hash(req.query, 64).str();
+    if(map.get(hash)){
+        var fs = require('fs');
+        fs.createReadStream('pngCache/'+hash+'.png').pipe(res);
+        return;
+    }
     var data = req.query.data;
     var center = req.query.center;
     var scale = req.query.scale;
     var size = req.query.size;
+
     var sectorName = req.query.sectorName;
     var renderService = new RenderService();
     center = [parseFloat(center[0]), parseFloat(center[1])];
@@ -38,6 +47,7 @@ router.get('/spa', function(req, res) {
     var polygon;
     if (sectorName) {
         var fs = require('fs');
+        var fileStream = fs.createWriteStream('pngCache/'+hash+'.png');
         //中国边界
         if(sectorName === '中国') {
             fs.readFile('./data/chinaborder.json', function (err, geodata) {
@@ -51,7 +61,10 @@ router.get('/spa', function(req, res) {
                     'Content-Type': 'image/png',
                     "Access-Control-Allow-Origin": "*"
                 });
-                renderService.paintSpatial(data, size, projection, poly).pngStream().pipe(res);
+                var stream = renderService.paintSpatial(data, size, projection, poly).pngStream();
+                map.set(hash,hash);
+                stream.pipe(fileStream);
+                stream.pipe(res);
             });
         }
         //中国地图各省市
@@ -69,7 +82,10 @@ router.get('/spa', function(req, res) {
                     'Content-Type': 'image/png',
                     "Access-Control-Allow-Origin": "*"
                 });
-                renderService.paintSpatial(data, size, projection, polygon).pngStream().pipe(res);
+                var stream = renderService.paintSpatial(data, size, projection, polygon).pngStream();
+                map.set(hash,hash);
+                stream.pipe(fileStream);
+                stream.pipe(res);
             })
         }
     } else {
