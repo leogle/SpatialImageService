@@ -1,4 +1,4 @@
-const Canvas = require('canvas');
+const {createCanvas} = require('canvas');
 
 function SpatialPainter() {
 
@@ -6,113 +6,120 @@ function SpatialPainter() {
      * 初始化颜色版
      */
     this.init = function () {
-        //var Canvas = require('canvas');
-        var _paleCanvas = new Canvas(1, 256);
-        var ctx = _paleCanvas.getContext("2d");
-        var grad = ctx.createLinearGradient(0, 0, 1, 256);
-        var gradient = this._getGradientDict();
-        for (var x in gradient) {
-            grad.addColorStop(parseFloat(x), gradient[x]);
+        try {
+            //var Canvas = require('canvas');
+            var _paleCanvas = createCanvas(1, 256);
+            var ctx = _paleCanvas.getContext("2d");
+            var grad = ctx.createLinearGradient(0, 0, 1, 256);
+            var gradient = this._getGradientDict();
+            for (var x in gradient) {
+                grad.addColorStop(parseFloat(x), gradient[x]);
+            }
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 1, 256);
+            this.palette = ctx.getImageData(0, 0, 1, 256).data;
+        }catch (e){
+            console.log('spatial init error'+e);
         }
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 1, 256);
-        this.palette = ctx.getImageData(0, 0, 1, 256).data;
     };
 
-    this.paintSpatial = function (canvas, data, projection, polygons) {
-        this.init();
-        //插值
-        //按照画布逐像素点着色
-        console.log(data);
-        var alpha = 0.5;
-        var _spatialData = this._setSpatialData(data, projection);
-        console.log(_spatialData);
-        var context = canvas.getContext('2d');
-        var image = context.createImageData(canvas.width, canvas.height);
-        var imgData = image.data;
-        var d = _spatialData;
-        var dlen = d.length;
-        var height = canvas.height;
-        var width = canvas.width;
-        var x1 = 0, x2 = width, y1 = 0, y2 = height;
-        //得到点值的二维数组
-        debugger;
-        var matrixData = [];
-        for (var i = 0; i <= height; i++) {
-            matrixData[i] = [];
-            for (var j = 0; j <= width; j++) {
-                matrixData[i][j] = '';
+    this.paintSpatial = function (canvas, data, projection, polygons,alpha=0.5) {
+        try {
+            this.init();
+            //插值
+            //按照画布逐像素点着色
+            console.log(data);
+            let _spatialData = this._setSpatialData(data, projection);
+            console.log(_spatialData);
+            let context = canvas.getContext('2d');
+            let image = context.createImageData(canvas.width, canvas.height);
+            let imgData = image.data;
+            let d = _spatialData;
+            let dlen = d.length;
+            let height = canvas.height;
+            let width = canvas.width;
+            let x1 = 0, x2 = width, y1 = 0, y2 = height;
+            //得到点值的二维数组
+            debugger;
+            var matrixData = [];
+            for (var i = 0; i <= height; i++) {
+                matrixData[i] = [];
+                for (var j = 0; j <= width; j++) {
+                    matrixData[i][j] = '';
+                }
             }
-        }
-        for (var _i = 0; _i < dlen; _i++) {
-            var point = d[_i];
-            if (x1 <= point.x && point.x <= x2 && y1 <= point.y && point.y <= y2) {
-                //仅在需要画图的区域初始化监测点数据
-                matrixData[point.y][point.x] = point.value;
+            for (var _i = 0; _i < dlen; _i++) {
+                var point = d[_i];
+                if (x1 <= point.x && point.x <= x2 && y1 <= point.y && point.y <= y2) {
+                    //仅在需要画图的区域初始化监测点数据
+                    matrixData[point.y][point.x] = point.value;
+                }
             }
-        }
-        var pixPolygons;
-        var maskData = null;
-        //使用遮罩绘制地图轮廓，填充红色，通过判断遮罩颜色确定数据点是否在多边形内
-        if (polygons) {
-            pixPolygons = this.convertPolygons(projection, polygons);
-            var maskCanvas = new Canvas(canvas.width, canvas.height);
-            this.drawPolygons(maskCanvas, pixPolygons);
-            var maskContext = maskCanvas.getContext('2d');
-            maskData = maskContext.getImageData(0, 0, canvas.width, canvas.height).data;
-            console.log(pixPolygons);
-        }
-        /**
-         * 插值矩阵数据,时间复杂度O(height*width*len)
-         *
-         */
-        for (var _i2 = y1; _i2 <= y2; _i2++) {
-            for (var _j = x1; _j <= x2; _j++) {
-                if (matrixData[_i2][_j] === '') {
-                    if (pixPolygons && pixPolygons.length > 0) {
-                        if (maskData[4 * (_i2 * width + _j)] === 0) {
-                            continue;
+            var pixPolygons;
+            var maskData = null;
+            //使用遮罩绘制地图轮廓，填充红色，通过判断遮罩颜色确定数据点是否在多边形内
+            if (polygons && polygons.length != 0) {
+                pixPolygons = this.convertPolygons(projection, polygons);
+                var maskCanvas = createCanvas(canvas.width, canvas.height);
+                this.drawPolygons(maskCanvas, pixPolygons);
+                var maskContext = maskCanvas.getContext('2d');
+                maskData = maskContext.getImageData(0, 0, canvas.width, canvas.height).data;
+                console.log(pixPolygons);
+            }
+            /**
+             * 插值矩阵数据,时间复杂度O(height*width*len)
+             *
+             */
+            for (var _i2 = y1; _i2 <= y2; _i2++) {
+                for (var _j = x1; _j <= x2; _j++) {
+                    if (matrixData[_i2][_j] === '') {
+                        if (pixPolygons && pixPolygons.length > 0) {
+                            if (maskData[4 * (_i2 * width + _j)] === 0) {
+                                continue;
+                            }
                         }
+                        var sum0 = 0,
+                            sum1 = 0;
+                        for (var k = 0; k < dlen; k++) {
+
+                            //将点位影响范围限制在500米内，性能下降不可接受
+                            // let pointlnglat=map.containerToLngLat(new AMap.Pixel(j,i));
+                            // if(pointlnglat.distance(new AMap.LngLat(d[k].lng,d[k].lat))>500){
+                            // 	continue;
+                            // }
+                            var distance = (_i2 - d[k].y) * (_i2 - d[k].y) + (_j - d[k].x) * (_j - d[k].x);
+                            //distance=Math.pow((i-d[k].y)*(i-d[k].y) + (j-d[k].x)*(j-d[k].x),-2);
+
+                            sum0 += d[k].value * 1.0 / distance;
+                            sum1 += 1.0 / distance;
+
+                            // sum0 += d[k].value*1.0/((i-d[k].y)*(i-d[k].y) + (j-d[k].x)*(j-d[k].x));
+                            // sum1 += 1.0/((i-d[k].y)*(i-d[k].y) + (j-d[k].x)*(j-d[k].x));
+                        }
+                        if (sum1 !== 0) matrixData[_i2][_j] = sum0 / sum1; else matrixData[_i2][_j] = 0;
                     }
-                    var sum0 = 0,
-                        sum1 = 0;
-                    for (var k = 0; k < dlen; k++) {
-
-                        //将点位影响范围限制在500米内，性能下降不可接受
-                        // let pointlnglat=map.containerToLngLat(new AMap.Pixel(j,i));
-                        // if(pointlnglat.distance(new AMap.LngLat(d[k].lng,d[k].lat))>500){
-                        // 	continue;
-                        // }
-                        var distance = (_i2 - d[k].y) * (_i2 - d[k].y) + (_j - d[k].x) * (_j - d[k].x);
-                        //distance=Math.pow((i-d[k].y)*(i-d[k].y) + (j-d[k].x)*(j-d[k].x),-2);
-
-                        sum0 += d[k].value * 1.0 / distance;
-                        sum1 += 1.0 / distance;
-
-                        // sum0 += d[k].value*1.0/((i-d[k].y)*(i-d[k].y) + (j-d[k].x)*(j-d[k].x));
-                        // sum1 += 1.0/((i-d[k].y)*(i-d[k].y) + (j-d[k].x)*(j-d[k].x));
-                    }
-                    if (sum1 !== 0) matrixData[_i2][_j] = sum0 / sum1; else matrixData[_i2][_j] = 0;
                 }
             }
-        }
-        //更新图片数据
-        for (var _i3 = y1; _i3 <= y2; _i3++) {
-            for (var _j2 = x1; _j2 <= x2; _j2++) {
-                if (matrixData[_i3][_j2] === "") {
-                    continue;
+            //更新图片数据
+            for (var _i3 = y1; _i3 <= y2; _i3++) {
+                for (var _j2 = x1; _j2 <= x2; _j2++) {
+                    if (matrixData[_i3][_j2] === "") {
+                        continue;
+                    }
+                    var radio = this._getRadioByValue(this.paramName, matrixData[_i3][_j2]);
+                    //radio=0.8
+                    imgData[4 * (_i3 * width + _j2)] = this.palette[Math.floor(radio * 255 + 1) * 4 - 4];
+                    imgData[4 * (_i3 * width + _j2) + 1] = this.palette[Math.floor(radio * 255 + 1) * 4 - 3];
+                    imgData[4 * (_i3 * width + _j2) + 2] = this.palette[Math.floor(radio * 255 + 1) * 4 - 2];
+                    imgData[4 * (_i3 * width + _j2) + 3] = Math.floor(255 * alpha);
                 }
-                var radio = this._getRadioByValue(this.paramName, matrixData[_i3][_j2]);
-                //radio=0.8
-                imgData[4 * (_i3 * width + _j2)] = this.palette[Math.floor(radio * 255 + 1) * 4 - 4];
-                imgData[4 * (_i3 * width + _j2) + 1] = this.palette[Math.floor(radio * 255 + 1) * 4 - 3];
-                imgData[4 * (_i3 * width + _j2) + 2] = this.palette[Math.floor(radio * 255 + 1) * 4 - 2];
-                imgData[4 * (_i3 * width + _j2) + 3] = Math.floor(255 * alpha);
             }
+            //image.data = imgData;
+            context.putImageData(image, 0, 0);
+            return image;
+        }catch (e){
+            console.log('paint spatial error'+e);
         }
-        //image.data = imgData;
-        context.putImageData(image, 0, 0);
-        return image;
     };
     /**
      * 将地理坐标数据转换成画布坐标数据
@@ -296,7 +303,8 @@ function SpatialPainter() {
          0.6: "rgb(153,0,76)", //紫色 300
          0.8: "rgb(126,0,35)", //褐红 400
          1.0: "rgb(126,0,35)"
-         };*/
+         };
+         */
         return {
             0: "#00deff", //蓝色 0
             0.1: "#00ff32", //绿色 50
@@ -307,6 +315,22 @@ function SpatialPainter() {
             0.8: "rgb(126,0,35)", //褐红 400
             1.0: "rgb(111,4,116)"
         };
+        /*return {
+            0: "#00ff32",
+            0.099: "#00ff32",
+            0.1: "#ffdc00",
+            0.199: "#ffdc00",
+            0.2: "#f06c19",
+            0.299: "#f06c19",
+            0.3: "#ff0000",
+            0.399: "#ff0000",
+            0.4: "#99004c",
+            0.599: "#99004c",
+            0.6: "#7e0024",
+            0.699: "#7e0024",
+            0.8: "rgb(126,0,35)",
+            1.0: "rgb(111,4,116)"
+        };*/
     };
 
     /**

@@ -1,6 +1,6 @@
-var express = require('express');
-var Canvas = require('canvas');
-var router = express.Router();
+const express = require('express');
+const Canvas = require('canvas');
+const router = express.Router();
 const Road = require('../painter/road-painter');
 
 /* GET users listing. */

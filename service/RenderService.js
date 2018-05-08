@@ -1,7 +1,7 @@
 /**
  * Created by lrh on 2017-11-30.
  */
-const Canvas = require('canvas');
+const {createCanvas} = require('canvas');
 
 function RenderService() {
 
@@ -10,9 +10,9 @@ function RenderService() {
         var Painter = require('../painter/lidar-painter');
         painter = new Painter();
         var size = [600,600];
-        var canvas = new Canvas(size[0],size[1]);
+        var canvas = createCanvas(size[0],size[1]);
 
-        var _paleCanvas = new Canvas(1,256);
+        var _paleCanvas = createCanvas(1,256);
         var ctx = _paleCanvas.getContext("2d");
         var grad = ctx.createLinearGradient(0, 0, 1, 256);
         var gradient = {
@@ -36,13 +36,37 @@ function RenderService() {
         console.log(p);
         painter.paintLidar(canvas,{x:300,y:300},300,p,-90,300,data);
         return canvas.pngStream();
-    }
+    };
     
     this.paintSpatial = function (data,size,projection,polygon) {
-        var canvas = new Canvas(size[0],size[1]);
+        var canvas = createCanvas(size[0],size[1]);
         var SpatialPainter = require('../painter/spatial-painter');
         var painter = new SpatialPainter();
         painter.paintSpatial(canvas,data,projection,polygon);
+        console.log('return canvas');
+        return canvas;
+    };
+
+    this.paintSpatialWithText = function (data,size,projection,polygon) {
+        //绘制渲染
+        let canvas = createCanvas(size[0], size[1]);
+        let SpatialPainter = require('../painter/spatial-painter');
+        let painter = new SpatialPainter();
+        console.log('paint Spatial');
+        painter.paintSpatial(canvas, data, projection, null,1);
+        //绘制路径
+        let PathPainter = require('../painter/path-painter');
+        let pathPainter = new PathPainter();
+        console.log('paint path');
+        pathPainter.paintPath(canvas,polygon,projection);
+
+        //绘制文本
+        let TextPainter = require('../painter/text-painter');
+        let textPainter = new TextPainter();
+        console.log('paint text');
+        textPainter.paintText(canvas, data.datas, projection);
+
+
         console.log('return canvas');
         return canvas;
     }
