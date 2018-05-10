@@ -22,7 +22,7 @@ function TextPainter() {
             for (let i = 0; i < projectTexts.length; i++) {
                 if(projectTexts[i].text) {
                     context.fillText(projectTexts[i].text,
-                        projectTexts[i].point[0] -labelOffset[0], projectTexts[i].point[1] -labelOffset[1]);
+                        projectTexts[i].point[0] + labelOffset[0], projectTexts[i].point[1] +labelOffset[1]);
                     context.beginPath();
                     context.arc(projectTexts[i].point[0], projectTexts[i].point[1], pointRadius, 0, 2 * Math.PI);
                     context.fill();

@@ -1,0 +1,14 @@
+html
+    include include/header.pug
+    body
+        include include/navbar.pug
+        div#img.col-md-6
+            img(src='/road/png')
+        div#description.col-md-6
+            h2 渲染道路
+                h3 接口：/road/png
+                p 通过
+                    a(href='http://www.openstreetmap.org') openstreetmap
+                    | 开源道路数据
+                    a(href='https://github.com/tyrasd/osmtogeojson') osm转换成geojson
+                    |格式数据，并绘制

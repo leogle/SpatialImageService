@@ -1,18 +1,17 @@
 const {createCanvas} = require('canvas');
 
 function SpatialPainter() {
-
     /**
      * 初始化颜色版
      */
     this.init = function () {
         try {
             //var Canvas = require('canvas');
-            var _paleCanvas = createCanvas(1, 256);
-            var ctx = _paleCanvas.getContext("2d");
-            var grad = ctx.createLinearGradient(0, 0, 1, 256);
-            var gradient = this._getGradientDict();
-            for (var x in gradient) {
+            let _paleCanvas = createCanvas(1, 256);
+            let ctx = _paleCanvas.getContext("2d");
+            let grad = ctx.createLinearGradient(0, 0, 1, 256);
+            let gradient = this._getGradientDict();
+            for (let x in gradient) {
                 grad.addColorStop(parseFloat(x), gradient[x]);
             }
             ctx.fillStyle = grad;
@@ -41,28 +40,28 @@ function SpatialPainter() {
             let x1 = 0, x2 = width, y1 = 0, y2 = height;
             //得到点值的二维数组
             debugger;
-            var matrixData = [];
-            for (var i = 0; i <= height; i++) {
+            let matrixData = [];
+            for (let i = 0; i <= height; i++) {
                 matrixData[i] = [];
-                for (var j = 0; j <= width; j++) {
+                for (let j = 0; j <= width; j++) {
                     matrixData[i][j] = '';
                 }
             }
-            for (var _i = 0; _i < dlen; _i++) {
-                var point = d[_i];
+            for (let _i = 0; _i < dlen; _i++) {
+                let point = d[_i];
                 if (x1 <= point.x && point.x <= x2 && y1 <= point.y && point.y <= y2) {
                     //仅在需要画图的区域初始化监测点数据
                     matrixData[point.y][point.x] = point.value;
                 }
             }
-            var pixPolygons;
-            var maskData = null;
+            let pixPolygons;
+            let maskData = null;
             //使用遮罩绘制地图轮廓，填充红色，通过判断遮罩颜色确定数据点是否在多边形内
-            if (polygons && polygons.length != 0) {
+            if (polygons && polygons.length !== 0) {
                 pixPolygons = this.convertPolygons(projection, polygons);
-                var maskCanvas = createCanvas(canvas.width, canvas.height);
+                let maskCanvas = createCanvas(canvas.width, canvas.height);
                 this.drawPolygons(maskCanvas, pixPolygons);
-                var maskContext = maskCanvas.getContext('2d');
+                let maskContext = maskCanvas.getContext('2d');
                 maskData = maskContext.getImageData(0, 0, canvas.width, canvas.height).data;
                 console.log(pixPolygons);
             }

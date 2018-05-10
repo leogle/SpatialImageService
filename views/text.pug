@@ -1,0 +1,10 @@
+html
+    include include/header.pug
+    body
+        include include/navbar.pug
+        div#img.col-md-6
+            img(src='render/spatext?'+param)
+        div#description.col-md-6
+            h2 带文字图片
+                h3 接口：/render/spatext
+                h3 参数参考/render/spa接口

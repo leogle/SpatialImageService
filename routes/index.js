@@ -1,9 +1,50 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const $ = require('jquery');
+const router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('index', { title: 'Express' });
+  res.render('index', { title: '渲染服务' });
 });
+
+router.get('/text', function(req, res) {
+    res.render('text', { title: '渲染服务',
+        param:parseParam(param)});
+});
+
+router.get('/lidar', function(req, res) {
+    res.render('lidar', { title: '渲染服务' });
+});
+
+let param = {
+    data: {
+        datas: [{lat: 32.7722, value: 100.0, lng: 116.7847, text: '测试1'},
+            {lat: 32.7322, value: 150.0, lng: 116.75847, text: '测试2'},
+            {lat: 32.7422, value: 70.0, lng: 116.8347, text: '测试3'},
+            {lat: 32.7822, value: 200.0, lng: 116.7647, text: '测试4'},],
+        paramName: "PM10"
+    },
+    center: [116.8447, 32.7722], //图片中心点经纬度
+    scale: 55000, //图片缩放值 参考值 中国:550-850,省份:4000 需要根据图片大小调整
+    size: [500, 400], //图片大小
+    sectorName: '潘集区',
+    //polygon:[[[116.95197390625,32.79847190625],[117.004205351563,32.7751638007813],[117.02271609375,32.75921409375],[117.048853789063,32.7288796210938],[117.087345,32.7238430000001],[117.099698515625,32.7143093085938],[117.07298953125,32.6981984687501],[117.037345,32.683843],[117.023985625,32.6772023750001],[116.920704375,32.6704836250001],[116.907345,32.663843],[116.885816679688,32.6531423164062],[116.863985625,32.6704836250001],[116.847345,32.673843],[116.831358671875,32.6658962226563],[116.813985625,32.7004836250001],[116.787345,32.713843],[116.767667265625,32.718891828125],[116.75326296875,32.7397585273438],[116.74142703125,32.7479274726563],[116.73326296875,32.7697585273438],[116.719112578125,32.7914821601563],[116.694459257813,32.7859548164063],[116.67310671875,32.799858625],[116.66326296875,32.8472145820313],[116.68326296875,32.8779274726563],[116.69142703125,32.9097585273438],[116.707345,32.933843],[116.737345,32.933843],[116.79271609375,32.90921409375],[116.806402617188,32.8933278632813],[116.95197390625,32.79847190625]]]
+};
+
+let parseParam = function (param, key) {
+    let paramStr = "";
+    debugger;
+    if (typeof param === 'number' || typeof param === 'string' || typeof param === 'boolean') {
+        paramStr += "&" + key + "=" + encodeURIComponent(param);
+    } else {
+        for(var i in param){
+            console.log(i+param[i]);
+            var k = key == null ? i : key + encodeURIComponent("[" + i + "]");
+            paramStr += '&' + parseParam(param[i], k);
+        }
+    }
+    return paramStr.substr(1);
+};
+
 
 module.exports = router;
