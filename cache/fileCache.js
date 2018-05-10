@@ -16,14 +16,14 @@ function fileCache() {
     this.take = function (key) {
         var fs = require('fs');
         fs.readFile()
-    }
+    };
 
     this.getPath = function (key) {
         var dir = path.join(this.filePath,hash(key));
         if(!fs.existsSync(dir)){
             fs.mkdirSync(dir);
         }
-    }
+    };
 
     this.hash = function (key) {
         return key.substr(0,2);

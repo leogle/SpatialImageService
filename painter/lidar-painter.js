@@ -1,6 +1,6 @@
 function Painter() {
     this.paintLidar = function (canvas,center,radioPix,palette,rotate,dataLength,data) {
-        var context = canvas.getContext('2d');
+        let context = canvas.getContext('2d');
         context.imageSmoothingEnabled  = true;
         context.clearRect(0,0,canvas.width,canvas.height);
         //绘制底图
@@ -12,19 +12,19 @@ function Painter() {
         context.closePath();
         context.fill();
         //绘制雷达扇形
-        for(var d = 0;d<data.length;d++){
-            var beam = data[d];
+        for(let d = 0;d<data.length;d++){
+            let beam = data[d];
             //设置渐变
-            var grd = context.createRadialGradient(center.x,center.y,0,center.x,center.y,radioPix);
-            for(var i=0;i<dataLength;i++){
-                var value = beam.Datas[i];
-                var index = Math.floor(value*256);
+            let grd = context.createRadialGradient(center.x,center.y,0,center.x,center.y,radioPix);
+            for(let i=0;i<dataLength;i++){
+                let value = beam.Datas[i];
+                let index = Math.floor(value*256);
                 //console.log(index);
                 if(index<0)
                     index=0;
                 if(index>255)
                     index=255;
-                var color = 'rgba('+palette[index*4]+','+palette[index*4+1]+','+palette[index*4+2]+','+(0.6+value)+')';
+                let color = 'rgba('+palette[index*4]+','+palette[index*4+1]+','+palette[index*4+2]+','+(0.6+value)+')';
                 //console.log(color);
                 grd.addColorStop(i/dataLength,color);
             }
@@ -32,7 +32,7 @@ function Painter() {
             //绘制扇形
             context.beginPath();
             context.moveTo(center.x,center.y);
-            var stopAngle = beam.Heading+rotate;
+            let stopAngle = beam.Heading+rotate;
             if(d<data.length-1)
                 stopAngle= data[d+1].Heading+rotate;
             context.arc(center.x,center.y,radioPix,(beam.Heading+rotate)*Math.PI/180,stopAngle*Math.PI/180);

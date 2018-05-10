@@ -1,8 +1,8 @@
 /**
  * Created by lrh on 2017-12-01.
  */
-var express = require('express');
-var router = express.Router();
+let express = require('express');
+let router = express.Router();
 const RenderService = require('../service/RenderService');
 const map = new Map();
 
@@ -11,7 +11,7 @@ router.get('/spa', function(req, res) {
     let fnv = require('fnv-plus');
     let hash = fnv.hash(req.query, 64).str();
     if(map.get(hash)){
-        var fs = require('fs');
+        let fs = require('fs');
         fs.createReadStream('pngCache/'+hash+'.png').pipe(res);
         return;
     }
@@ -85,7 +85,7 @@ router.get('/spatext', function(req, res) {
     let fnv = require('fnv-plus');
     let hash = fnv.hash(req.query, 64).str();
     if(map.get(hash)){
-        var fs = require('fs');
+        let fs = require('fs');
         fs.createReadStream('pngCache/'+hash+'.png').pipe(res);
         return;
     }

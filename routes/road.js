@@ -4,7 +4,7 @@ const router = express.Router();
 const Road = require('../painter/road-painter');
 
 router.get('/',function (req,res) {
-   res.render('road',{});
+   res.render('road',{ title: '渲染服务' });
 });
 
 /* GET users listing. */

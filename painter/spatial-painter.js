@@ -6,7 +6,6 @@ function SpatialPainter() {
      */
     this.init = function () {
         try {
-            //var Canvas = require('canvas');
             let _paleCanvas = createCanvas(1, 256);
             let ctx = _paleCanvas.getContext("2d");
             let grad = ctx.createLinearGradient(0, 0, 1, 256);
@@ -69,24 +68,24 @@ function SpatialPainter() {
              * 插值矩阵数据,时间复杂度O(height*width*len)
              *
              */
-            for (var _i2 = y1; _i2 <= y2; _i2++) {
-                for (var _j = x1; _j <= x2; _j++) {
+            for (let _i2 = y1; _i2 <= y2; _i2++) {
+                for (let _j = x1; _j <= x2; _j++) {
                     if (matrixData[_i2][_j] === '') {
                         if (pixPolygons && pixPolygons.length > 0) {
                             if (maskData[4 * (_i2 * width + _j)] === 0) {
                                 continue;
                             }
                         }
-                        var sum0 = 0,
+                        let sum0 = 0,
                             sum1 = 0;
-                        for (var k = 0; k < dlen; k++) {
+                        for (let k = 0; k < dlen; k++) {
 
                             //将点位影响范围限制在500米内，性能下降不可接受
                             // let pointlnglat=map.containerToLngLat(new AMap.Pixel(j,i));
                             // if(pointlnglat.distance(new AMap.LngLat(d[k].lng,d[k].lat))>500){
                             // 	continue;
                             // }
-                            var distance = (_i2 - d[k].y) * (_i2 - d[k].y) + (_j - d[k].x) * (_j - d[k].x);
+                            let distance = (_i2 - d[k].y) * (_i2 - d[k].y) + (_j - d[k].x) * (_j - d[k].x);
                             //distance=Math.pow((i-d[k].y)*(i-d[k].y) + (j-d[k].x)*(j-d[k].x),-2);
 
                             sum0 += d[k].value * 1.0 / distance;
@@ -100,12 +99,12 @@ function SpatialPainter() {
                 }
             }
             //更新图片数据
-            for (var _i3 = y1; _i3 <= y2; _i3++) {
-                for (var _j2 = x1; _j2 <= x2; _j2++) {
+            for (let _i3 = y1; _i3 <= y2; _i3++) {
+                for (let _j2 = x1; _j2 <= x2; _j2++) {
                     if (matrixData[_i3][_j2] === "") {
                         continue;
                     }
-                    var radio = this._getRadioByValue(this.paramName, matrixData[_i3][_j2]);
+                    let radio = this._getRadioByValue(this.paramName, matrixData[_i3][_j2]);
                     //radio=0.8
                     imgData[4 * (_i3 * width + _j2)] = this.palette[Math.floor(radio * 255 + 1) * 4 - 4];
                     imgData[4 * (_i3 * width + _j2) + 1] = this.palette[Math.floor(radio * 255 + 1) * 4 - 3];
@@ -133,11 +132,11 @@ function SpatialPainter() {
         if (data === null) {
             return null;
         }
-        var _jsonData = data.datas;
-        var _jdlen = data.datas.length;
-        var _spatialData = [];
+        let _jsonData = data.datas;
+        let _jdlen = data.datas.length;
+        let _spatialData = [];
         while (_jdlen--) {
-            var pixel = projection([_jsonData[_jdlen].lng, _jsonData[_jdlen].lat]);
+            let pixel = projection([_jsonData[_jdlen].lng, _jsonData[_jdlen].lat]);
             console.log(pixel);
             _spatialData.push({
                 "lng": _jsonData[_jdlen].lng,
@@ -153,11 +152,11 @@ function SpatialPainter() {
     };
     this._getRadioByValue = function (param, value) {
         //根据污染物名称和浓度值计算在图例中显示的颜色比例
-        var levelDict = this._getParamValueLevelDict(param);
+        let levelDict = this._getParamValueLevelDict(param);
         if (value < 0) {
             return 0.0;
         } else {
-            for (var key in levelDict) {
+            for (let key in levelDict) {
                 if (levelDict[key][1] === null && value > levelDict[key][0]) {
                     //最大值
                     return key;
@@ -340,8 +339,8 @@ function SpatialPainter() {
      */
     this.convertPolygon = function (projection, polygon) {
         console.log('convertPolygon');
-        var pixPolygon = [];
-        for (var i = 0; i < polygon.length; i++) {
+        let pixPolygon = [];
+        for (let i = 0; i < polygon.length; i++) {
             pixPolygon.push(projection([polygon[i][0], polygon[i][1]]));
         }
         return pixPolygon;
@@ -351,9 +350,9 @@ function SpatialPainter() {
      * 转换多个多边形
      * */
     this.convertPolygons = function (projection,polygons) {
-        var pixPolygons = [];
-        for(var i = 0;i<polygons.length;i++){
-            var pixPolygon = this.convertPolygon(projection,polygons[i]);
+        let pixPolygons = [];
+        for(let i = 0;i<polygons.length;i++){
+            let pixPolygon = this.convertPolygon(projection,polygons[i]);
             pixPolygons.push(pixPolygon);
         }
         return pixPolygons;
@@ -364,7 +363,7 @@ function SpatialPainter() {
      * @param polygons
      */
     this.drawPolygons = function (canvas,polygons) {
-        for(var i = 0;i<polygons.length;i++){
+        for(let i = 0;i<polygons.length;i++){
             this.drawPolygon(canvas,polygons[i]);
         }
     };
@@ -375,11 +374,11 @@ function SpatialPainter() {
      * @param polygon
      */
     this.drawPolygon = function (canvas, polygon) {
-        var context = canvas.getContext('2d');
+        let context = canvas.getContext('2d');
         if (polygon && polygon.length > 3) {
             context.beginPath();
             context.moveTo(polygon[0][0], polygon[0][1]);
-            for (var i = 1; i < polygon.length; i++) {
+            for (let i = 1; i < polygon.length; i++) {
                 context.lineTo(polygon[i][0], polygon[i][1]);
             }
             context.closePath();
@@ -397,14 +396,14 @@ function SpatialPainter() {
     this.pnpoly = function (point, polygon) {
         // ray-casting algorithm based on
         // http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
-        var x = point[0], y = point[1];
+        let x = point[0], y = point[1];
 
-        var inside = false;
-        for (var i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-            var xi = polygon[i][0], yi = polygon[i][1];
-            var xj = polygon[j][0], yj = polygon[j][1];
+        let inside = false;
+        for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+            let xi = polygon[i][0], yi = polygon[i][1];
+            let xj = polygon[j][0], yj = polygon[j][1];
 
-            var intersect = ((yi > y) !== (yj > y))
+            let intersect = ((yi > y) !== (yj > y))
                 && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
             if (intersect) {
                 inside = !inside
