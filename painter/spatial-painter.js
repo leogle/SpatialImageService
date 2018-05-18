@@ -26,6 +26,9 @@ function SpatialPainter() {
             this.init();
             //插值
             //按照画布逐像素点着色
+            if(data.min && data.max) {
+                this.minMax = [data.min,data.max];
+            }
             console.log(data);
             let _spatialData = this._setSpatialData(data, projection);
             console.log(_spatialData);
@@ -153,18 +156,34 @@ function SpatialPainter() {
     this._getRadioByValue = function (param, value) {
         //根据污染物名称和浓度值计算在图例中显示的颜色比例
         let levelDict = this._getParamValueLevelDict(param);
+
         if (value < 0) {
             return 0.0;
         } else {
+            let scaleValue = value;
+            scaleValue = this.scale(levelDict,this.minMax,value);
             for (let key in levelDict) {
-                if (levelDict[key][1] === null && value > levelDict[key][0]) {
+                if (levelDict[key][1] === null && scaleValue > levelDict[key][0]) {
                     //最大值
                     return key;
-                } else if (levelDict[key][0] < value && value <= levelDict[key][1]) {
-                    return parseFloat(key) + (value - levelDict[key][0]) / (levelDict[key][1] - levelDict[key][0]) * levelDict[key][2];
+                } else if (levelDict[key][0] < scaleValue && scaleValue <= levelDict[key][1]) {
+                    return parseFloat(key) + (scaleValue - levelDict[key][0]) / (levelDict[key][1] - levelDict[key][0]) * levelDict[key][2];
                 }
             }
         }
+    };
+    this.scale = function(levelDict,minMax,value){
+        let lo = levelDict[0][0];
+        let hi = levelDict[0.8][0];
+        if(minMax) {
+            let res = ((value - minMax[0]) / (minMax[1] - minMax[0]) * (hi - lo));
+            if (res < lo)
+                return lo;
+            if (res > hi)
+                return hi;
+            return res;
+        }
+        return value;
     };
     this._getParamValueLevelDict = function (param) {
         //根据污染物名称获取分级比例字典

@@ -11,6 +11,7 @@ var users = require('./routes/users');
 var images = require('./routes/images');
 var render = require('./routes/render');
 var road = require('./routes/road');
+var traffic = require('./routes/traffic');
 
 var app = express();
 
@@ -30,6 +31,7 @@ app.use('/users', users);
 app.use('/image',images);
 app.use('/render',render);
 app.use('/road',road);
+app.use('/traffic',traffic);
 
 /// catch 404 and forwarding to error handler
 app.use(function(req, res, next) {

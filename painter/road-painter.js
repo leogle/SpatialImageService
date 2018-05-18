@@ -7,7 +7,7 @@ function RoadPainter() {
         }
     };
 
-    this.paintRoad = function (canvas,polygon,projection) {
+    this.paintRoad = function (canvas,polygon,projection,color='green') {
         try {
             let context = canvas.getContext("2d");
             let projectPolygon = this.convertPolygon(projection, polygon);
@@ -16,7 +16,7 @@ function RoadPainter() {
             for (let i = 1; i < projectPolygon.length; i++) {
                 context.lineTo(projectPolygon[i][0], projectPolygon[i][1]);
             }
-            context.strokeStyle = 'green';
+            context.strokeStyle = color;
             context.lineWidth = 1;
             context.stroke();
         }catch (e){

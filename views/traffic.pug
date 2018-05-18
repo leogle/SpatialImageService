@@ -1,0 +1,14 @@
+html
+    include include/header.pug
+    body
+        include include/navbar.pug
+        div#img.col-md-6
+            img(src='/traffic/traffic?level=4&rectangle=113.2618,23.1017;113.3093,23.1407&scale=600000')
+        div#description.col-md-6
+            h2 路况渲染
+                h3 接口：/traffic/traffic
+                h3 参数
+                p level=4&rectangle=113.2618,23.1017;113.3093,23.1407
+                p 参考
+                    |
+                    a(href='http://lbs.amap.com/api/webservice/guide/api/trafficstatus/#road') 高德接口api

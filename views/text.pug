@@ -8,3 +8,15 @@ html
             h2 带文字图片
                 h3 接口：/render/spatext
                 h3 参数参考/render/spa接口
+                p.
+                    data: {
+                    <br/>datas: [{lat: 32.7722, value: 85.0, lng: 116.7847, text: '测试1',layout:'left'},
+                    <br/>             {lat: 32.7322, value: 45.0, lng: 116.75847, text: '测试2',layout:'right'},
+                    <br/>             {lat: 32.7822, value: 65.0, lng: 116.8347, text: '测试3',layout:'top'},
+                    <br/>            {lat: 32.8222, value: 75.0, lng: 116.7647, text: '测试4',layout:'bottom'},],
+                    <br/>         paramName: "PM2_5"
+                    <br/>},
+                    <br/>center: [116.8447, 32.7722], //图片中心点经纬度
+                    <br/>scale: 55000, //图片缩放值 参考值 中国:550-850,省份:4000 需要根据图片大小调整
+                    <br/>size: [500, 400], //图片大小
+                    <br/>sectorName: '潘集区',

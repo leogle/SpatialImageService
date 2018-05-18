@@ -104,7 +104,9 @@ router.get('/spatext', function(req, res) {
         let d = { lng: parseFloat(data.datas[i].lng),
             lat: parseFloat(data.datas[i].lat),
             value: parseFloat(data.datas[i].value),
-            text:data.datas[i].text,};
+            text:data.datas[i].text,
+            layout:data.datas[i].layout,
+        };
         if(!isNaN(d.lng) && !isNaN(d.lat) && !isNaN(d.value)) {
             floatData.push(d);
         }

@@ -8,6 +8,7 @@ router.get('/', function(req, res) {
 });
 
 router.get('/text', function(req, res) {
+    let qs = require('querystring');
     res.render('text', { title: '渲染服务',
         param:parseParam(param)});
 });
@@ -18,11 +19,11 @@ router.get('/lidar', function(req, res) {
 
 let param = {
     data: {
-        datas: [{lat: 32.7722, value: 100.0, lng: 116.7847, text: '测试1'},
-            {lat: 32.7322, value: 150.0, lng: 116.75847, text: '测试2'},
-            {lat: 32.7422, value: 70.0, lng: 116.8347, text: '测试3'},
-            {lat: 32.7822, value: 200.0, lng: 116.7647, text: '测试4'},],
-        paramName: "PM10"
+        datas: [{lat: 32.7722, value: 85.0, lng: 116.7847, text: '测试1',layout:'left'},
+            {lat: 32.7322, value: 45.0, lng: 116.75847, text: '测试2',layout:'right'},
+            {lat: 32.7822, value: 65.0, lng: 116.8347, text: '测试3',layout:'top'},
+            {lat: 32.8222, value: 75.0, lng: 116.7647, text: '测试4',layout:'bottom'},],
+        paramName: "PM2_5",
     },
     center: [116.8447, 32.7722], //图片中心点经纬度
     scale: 55000, //图片缩放值 参考值 中国:550-850,省份:4000 需要根据图片大小调整
@@ -35,7 +36,6 @@ let param = {
  * */
 let parseParam = function (param, key) {
     let paramStr = "";
-    debugger;
     if (typeof param === 'number' || typeof param === 'string' || typeof param === 'boolean') {
         paramStr += "&" + key + "=" + encodeURIComponent(param);
     } else {
