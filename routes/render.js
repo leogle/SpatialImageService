@@ -1,82 +1,93 @@
 /**
  * Created by lrh on 2017-12-01.
  */
-let express = require('express');
-let router = express.Router();
+const express = require('express');
+const router = express.Router();
+const log4js = require('../log/log');
+const log = log4js.logger("imageService");
 const RenderService = require('../service/RenderService');
 const map = new Map();
 
 router.get('/spa', function(req, res) {
-    console.log('render/statial');
-    let fnv = require('fnv-plus');
-    let hash = fnv.hash(req.query, 64).str();
-    if(map.get(hash)){
-        let fs = require('fs');
-        fs.createReadStream('pngCache/'+hash+'.png').pipe(res);
-        return;
-    }
-    let data = req.query.data;
-    let center = req.query.center;
-    let scale = req.query.scale;
-    let size = req.query.size;
-    let sectorName = req.query.sectorName;
-    let renderService = new RenderService();
-    center = [parseFloat(center[0]), parseFloat(center[1])];
-    size = [parseFloat(size[0]), parseFloat(size[1])];
-    console.log("center %s", center);
-    console.log("size %s", size);
-    let floatData =[];
-    for (let i = 0; i < data.datas.length; i++) {
-        let d = { lng: parseFloat(data.datas[i].lng),
-            lat: parseFloat(data.datas[i].lat),
-            value: parseFloat(data.datas[i].value) };
-        if(!isNaN(d.lng) && !isNaN(d.lat) && !isNaN(d.value)) {
-            floatData.push(d);
+    try {
+        console.log('render/statial');
+        log.info('render/statial');
+        let fnv = require('fnv-plus');
+        let hash = fnv.hash(req.query, 64).str();
+        if (map.get(hash)) {
+            let fs = require('fs');
+            fs.createReadStream('pngCache/' + hash + '.png').pipe(res);
+            return;
         }
-    }
-    data.datas=floatData;
-    let projection = getProjection(center,scale,size);
-    let polygon;
-    if (sectorName) {
-        let fs = require('fs');
-        let fileStream = fs.createWriteStream('pngCache/'+hash+'.png');
-        //中国边界
-        if(sectorName === '中国') {
-            fs.readFile('./data/chinaborder.json', function (err, geodata) {
-                let geojson = JSON.parse(geodata);
-                polygon = geojson.data;
-                let poly = [];
-                for (let i = 0; i < polygon.length; i++) {
-                    poly.push(polygon[i]);
-                }
-                writeHead(res);
-                let stream = renderService.paintSpatial(data, size, projection, poly).pngStream();
-                map.set(hash,hash);
-                stream.pipe(fileStream);
-                stream.pipe(res);
-            });
+        let data = req.query.data;
+        let center = req.query.center;
+        let scale = req.query.scale;
+        let size = req.query.size;
+        let sectorName = req.query.sectorName;
+        let renderService = new RenderService();
+        center = [parseFloat(center[0]), parseFloat(center[1])];
+        size = [parseFloat(size[0]), parseFloat(size[1])];
+        console.log("center %s", center);
+        console.log("size %s", size);
+        let floatData = [];
+        for (let i = 0; i < data.datas.length; i++) {
+            let d = {
+                lng: parseFloat(data.datas[i].lng),
+                lat: parseFloat(data.datas[i].lat),
+                value: parseFloat(data.datas[i].value)
+            };
+            if (!isNaN(d.lng) && !isNaN(d.lat) && !isNaN(d.value)) {
+                floatData.push(d);
+            }
         }
-        //中国地图各省市
-        else {
-            fs.readFile('./data/china.json','utf-8', function (err, geodata) {
-                let geojson = JSON.parse(geodata);
-                for (let i = 0; i < geojson.features.length; i++) {
-                    if (geojson.features[i].properties.name === sectorName) {
-                        polygon = geojson.features[i].geometry.coordinates;
-                        break;
+        data.datas = floatData;
+        let projection = getProjection(center, scale, size);
+        let polygon;
+        if (sectorName) {
+            let fs = require('fs');
+            let fileStream = fs.createWriteStream('pngCache/' + hash + '.png');
+            //中国边界
+            if (sectorName === '中国') {
+                fs.readFile('./data/chinaborder.json', function (err, geodata) {
+                    let geojson = JSON.parse(geodata);
+                    polygon = geojson.data;
+                    let poly = [];
+                    for (let i = 0; i < polygon.length; i++) {
+                        poly.push(polygon[i]);
                     }
-                }
-                console.dir(polygon);
-                writeHead(res);
-                let stream = renderService.paintSpatial(data, size, projection, polygon).pngStream();
-                map.set(hash,hash);
-                stream.pipe(fileStream);
-                stream.pipe(res);
-            })
+                    writeHead(res);
+                    let stream = renderService.paintSpatial(data, size, projection, poly).pngStream();
+                    map.set(hash, hash);
+                    stream.pipe(fileStream);
+                    stream.pipe(res);
+                });
+            }
+            //中国地图各省市
+            else {
+                fs.readFile('./data/china.json', 'utf-8', function (err, geodata) {
+                    let geojson = JSON.parse(geodata);
+                    for (let i = 0; i < geojson.features.length; i++) {
+                        if (geojson.features[i].properties.name === sectorName) {
+                            polygon = geojson.features[i].geometry.coordinates;
+                            break;
+                        }
+                    }
+                    console.dir(polygon);
+                    writeHead(res);
+                    let stream = renderService.paintSpatial(data, size, projection, polygon).pngStream();
+                    map.set(hash, hash);
+                    stream.pipe(fileStream);
+                    stream.pipe(res);
+                })
+            }
+        } else {
+            writeHead(res);
+            renderService.paintSpatial(data, size, projection, polygon).pngStream().pipe(res);
         }
-    } else {
-        writeHead(res);
-        renderService.paintSpatial(data, size, projection, polygon).pngStream().pipe(res);
+    }catch(e)
+    {
+        log.error("render/statial error"+e.toString());
+        throw e;
     }
 });
 

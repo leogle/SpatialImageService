@@ -41,7 +41,6 @@ function SpatialPainter() {
             let width = canvas.width;
             let x1 = 0, x2 = width, y1 = 0, y2 = height;
             //得到点值的二维数组
-            debugger;
             let matrixData = [];
             for (let i = 0; i <= height; i++) {
                 matrixData[i] = [];
@@ -115,7 +114,6 @@ function SpatialPainter() {
                     imgData[4 * (_i3 * width + _j2) + 3] = Math.floor(255 * alpha);
                 }
             }
-            //image.data = imgData;
             context.putImageData(image, 0, 0);
             return image;
         }catch (e){

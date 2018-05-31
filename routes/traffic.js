@@ -13,6 +13,8 @@ router.get('/traffic',function (req,res) {
     let level = req.query.level;
     let rectangle = req.query.rectangle;
     let scale = req.query.scale;
+    let size = req.query.size;
+    size = [parseFloat(size[0]), parseFloat(size[1])];
     let sw = [parseFloat(rectangle.split(";")[0].split(",")[0]),parseFloat(rectangle.split(";")[0].split(",")[1])];
     let ne = [parseFloat(rectangle.split(";")[1].split(",")[0]),parseFloat(rectangle.split(";")[1].split(",")[1])];
     let param = {
@@ -25,7 +27,7 @@ router.get('/traffic',function (req,res) {
     var projection = d3.geoMercator()
         .center([(ne[0]+sw[0])/2,(ne[1]+sw[1])/2])
         .scale(scale)
-        .translate([500, 300]);
+        .translate([size[0]/2, size[1]/2]);
     http.get('http://restapi.amap.com/v3/traffic/status/rectangle?'+qs.stringify(param),function (getRes) {
         let buf = [];
         getRes.on('data',function (data) {
@@ -41,12 +43,14 @@ router.get('/traffic',function (req,res) {
             if(resData.status==="1"){
                 let trafficinfo = resData.trafficinfo;
                 let roadPainter = new Road();
-                let canvas = createCanvas(1000, 600);
+                let canvas = createCanvas(size[0], size[1]);
                 for(let i = 0;i<trafficinfo.roads.length;i++){
                     let road = trafficinfo.roads[i];
-                    var polygon = convert(road.polyline);
-                    let color = getColor(road);
-                    roadPainter.paintRoad(canvas,polygon,projection,color);
+                    if(road.polyline) {
+                        var polygon = convert(road.polyline);
+                        let color = getColor(road);
+                        roadPainter.paintRoad(canvas, polygon, projection, color);
+                    }
                 }
                 res.writeHead(200, {
                     'Content-Type': 'image/png',
@@ -77,7 +81,7 @@ getColor = function (road) {
         return 'gray';
     }
     else if (road.status === "1") {
-        return '#00ff00';
+        return '#0fae03';
     }
     else if (road.status === "2") {
         return 'orange';

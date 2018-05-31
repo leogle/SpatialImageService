@@ -1,13 +1,4 @@
 {
-  "appenders": [
-    {
-      "type": "console"
-    },
-    {
-      "type": "dateFile",
-      "filename": "logs/booklist.log",
-      "pattern": "-yyyy-MM-dd",
-      "alwaysIncludePattern": true
-    }
-  ]
+  "appenders": { "imageService": { "type": "file", "filename": "logs.log" } },
+  "categories": { "default": { "appenders": ["imageService"], "level": "debug" } }
 }

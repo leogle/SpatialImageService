@@ -1,5 +1,5 @@
 var express = require('express');
-//var log4js = require('./log')
+var log4js = require('./log/log');
 var path = require('path');
 var favicon = require('static-favicon');
 var logger = require('morgan');
@@ -14,7 +14,9 @@ var road = require('./routes/road');
 var traffic = require('./routes/traffic');
 
 var app = express();
-
+log4js.configure();
+let log = log4js.logger("imageService");
+log.debug("app startup");
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');

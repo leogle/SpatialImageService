@@ -20,7 +20,7 @@ exports.configure = function() {
  */
 exports.logger = function(name) {
     let dateFileLog = log4js.getLogger(name);
-    dateFileLog.setLevel(log4js.levels.INFO);
+    //dateFileLog.setLevel(log4js.levels.INFO);
     return dateFileLog;
 };
 
