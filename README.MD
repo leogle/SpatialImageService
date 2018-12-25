@@ -29,3 +29,4 @@ url: /render/location\
        center:[117.0,21.2],\
        scale:4000,\}\
 返回：appliction/json\
+![渲染图](https://github.com/leogle/ImageService/blob/master/demo.png?raw=true)
