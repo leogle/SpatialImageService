@@ -13,6 +13,7 @@ var render = require('./routes/render');
 var road = require('./routes/road');
 var traffic = require('./routes/traffic');
 
+
 var app = express();
 log4js.configure();
 let log = log4js.logger("imageService");
@@ -23,8 +24,8 @@ app.set('view engine', 'pug');
 
 app.use(favicon());
 app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded());
+app.use(bodyParser.json({"limit":"10mb"}));
+app.use(bodyParser.urlencoded({"limit":"10mb"}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 

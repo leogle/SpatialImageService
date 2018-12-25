@@ -2,17 +2,7 @@ var SpatialPainter = require('../painter/spatial-painter');
 
 let painter = new SpatialPainter();
 let dict = painter._getParamValueLevelDict("PM10");
-console.log(painter.scale(dict,[0,420],250));
-console.log(painter.scale(dict,[0,420],100));
-console.log(painter.scale(dict,[0,420],0));
 
-console.log(painter.scale(dict,[0,250],250));
-console.log(painter.scale(dict,[0,250],100));
-console.log(painter.scale(dict,[0,250],0));
-
-console.log(painter.scale(dict,[100,250],250));
-console.log(painter.scale(dict,[100,250],101));
-console.log(painter.scale(dict,[100,250],0));
 
 const http = require('http');
 const qs = require('querystring');

@@ -1,5 +1,5 @@
 {
-  "name": "application-name",
+  "name": "imageService",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -20,9 +20,11 @@
     "log4js": "^2.7.0",
     "morgan": "~1.0.0",
     "node-windows": "^0.1.14",
+    "proj4": "^2.5.0",
     "pug": "^2.0.3",
     "static-favicon": "~1.0.0",
     "supervisor": "^0.12.0",
+    "swagger-ui-dist": "^3.17.3",
     "v8debug": "^0.1.2",
     "webpage": "^0.3.0",
     "zrender": "^3.7.4"
