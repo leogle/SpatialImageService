@@ -38,11 +38,11 @@ function RenderService() {
         return canvas.pngStream();
     };
     
-    this.paintSpatial = function (data,size,projection,polygon) {
+    this.paintSpatial = function (data,size,projection,polygon,conrec=false) {
         var canvas = createCanvas(size[0],size[1]);
         var SpatialPainter = require('../painter/spatial-painter');
         var painter = new SpatialPainter();
-        painter.paintSpatial(canvas,data,projection,polygon);
+        painter.paintSpatial(canvas,data,projection,polygon,0.5,conrec);
         console.log('return canvas');
         return canvas;
     };

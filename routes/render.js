@@ -24,6 +24,7 @@ router.get('/spa', function(req, res) {
         let scale = req.query.scale;
         let size = req.query.size;
         let sectorName = req.query.sectorName;
+        let conrec = req.query.conrec;
         let renderService = new RenderService();
         center = [parseFloat(center[0]), parseFloat(center[1])];
         size = [parseFloat(size[0]), parseFloat(size[1])];
@@ -60,7 +61,7 @@ router.get('/spa', function(req, res) {
                         'Content-Type': 'image/png',
                         "Access-Control-Allow-Origin": "*"
                     });
-                    let stream = renderService.paintSpatial(data, size, projection, poly).pngStream();
+                    let stream = renderService.paintSpatial(data, size, projection, poly,conrec).pngStream();
                     map.set(hash, hash);
                     stream.pipe(fileStream);
                     stream.pipe(res);
@@ -82,7 +83,7 @@ router.get('/spa', function(req, res) {
                         'Content-Type': 'image/png',
                         "Access-Control-Allow-Origin": "*"
                     });
-                    let stream = renderService.paintSpatial(data, size, projection, polygon).pngStream();
+                    let stream = renderService.paintSpatial(data, size, projection, polygon,conrec).pngStream();
                     map.set(hash, hash);
                     stream.pipe(fileStream);
                     stream.pipe(res);
@@ -110,8 +111,8 @@ router.get('/getimg',function (req,res) {
             'Content-Type': 'image/png',
             "Access-Control-Allow-Origin": "*"
         });
-        fs.createReadStream('pngCache/' + hash + '.png').pipe(res);
-        return res.end();
+        fs.createReadStream('./pngCache/' + hash + '.png').pipe(res);
+        return;
     }
 });
 
@@ -120,53 +121,55 @@ router.post('/postspa',function (req,res) {
         console.log('render/statial');
         log.info('render/statial');
         let fnv = require('fnv-plus');
-        let hash = fnv.hash(req.body, 64).str();
+        let body = req.body;
+        //计算请求hash值
+        let hash = fnv.hash(body, 64).str();
+        //查询图片是否缓存，已缓存时直接返回hash
         if (map.get(hash)) {
             writeHead(res);
             return res.end(JSON.stringify({hash:hash}));
         }
-        let data = req.body.data;
-        let center = req.body.center;
-        let scale = req.body.scale;
-        let size = req.body.size;
-        let sectorName = req.body.sectorName;
+        let data = body.data;
+        let center = body.center;
+        let scale = body.scale;
+        let size = body.size;
+        let conrec = body.conrec;
+        let sectorName = body.sectorName;
         let renderService = new RenderService();
         center = [parseFloat(center[0]), parseFloat(center[1])];
         size = [parseFloat(size[0]), parseFloat(size[1])];
-        console.log("center %s", center);
-        console.log("size %s", size);
         let floatData = [];
+        //数据处理成指定格式
         for (let i = 0; i < data.datas.length; i++) {
             let d = {
                 lng: parseFloat(data.datas[i].lng),
                 lat: parseFloat(data.datas[i].lat),
                 value: parseFloat(data.datas[i].value)
             };
+            //不符合要求的数据跳过
             if (!isNaN(d.lng) && !isNaN(d.lat) && !isNaN(d.value)) {
                 floatData.push(d);
             }
         }
         data.datas = floatData;
+        //获取投影
         let projection = getProjection(center, scale, size);
         let polygon;
         let fs = require('fs');
-        let fileStream = fs.createWriteStream('pngCache/' + hash + '.png');
+        //通过行政区切边
         if (sectorName) {
             //中国边界
             if (sectorName === '中国') {
                 fs.readFile('./data/chinaborder.json', function (err, geodata) {
+                    //国界地图由多边形数组组成
                     let geojson = JSON.parse(geodata);
                     polygon = geojson.data;
                     let poly = [];
                     for (let i = 0; i < polygon.length; i++) {
                         poly.push(polygon[i]);
                     }
-                    writeHead(res);
-                    let stream = renderService.paintSpatial(data, size, projection, poly).pngStream();
-                    map.set(hash, hash);
-                    stream.pipe(fileStream);
-                    return res.end(JSON.stringify({hash:hash}));
-                    //stream.pipe(res);
+                    let stream = renderService.paintSpatial(data, size, projection, poly,conrec).pngStream();
+                    return cacheAndRes(hash,stream,res);
                 });
             }
             //中国地图各省市
@@ -174,26 +177,31 @@ router.post('/postspa',function (req,res) {
                 fs.readFile('./data/china.json', 'utf-8', function (err, geodata) {
                     let geojson = JSON.parse(geodata);
                     for (let i = 0; i < geojson.features.length; i++) {
-                        if (geojson.features[i].properties.name === sectorName) {
-                            polygon = geojson.features[i].geometry.coordinates;
-                            break;
+                        var feature = geojson.features[i];
+                        if (feature.properties.name === sectorName) {
+                            if(feature.geometry.type=="Polygon"){
+                                polygon = feature.geometry.coordinates;
+                                break;
+                            }else if(feature.geometry.type=="MultiPolygon"){
+                                polygon = [];
+                                feature.geometry.coordinates.forEach(element => {
+                                    element.forEach(poly=>{
+                                        polygon.push(poly);
+                                    })
+                                });
+                                break;
+                            }
                         }
                     }
                     console.dir(polygon);
-                    writeHead(res);
-                    let stream = renderService.paintSpatial(data, size, projection, polygon).pngStream();
-                    map.set(hash, hash);
-                    stream.pipe(fileStream);
-                    return res.end(JSON.stringify({hash:hash}));
-                    //stream.pipe(res);
+                    let stream = renderService.paintSpatial(data, size, projection, polygon,conrec).pngStream();
+                    return cacheAndRes(hash,stream,res);
                 })
             }
-        } else {
-            writeHead(res);
+        }
+        else {//不切边
             let stream = renderService.paintSpatial(data, size, projection, polygon).pngStream();
-            map.set(hash, hash);
-            stream.pipe(fileStream);
-            return res.end(JSON.stringify({hash:hash}));
+            return cacheAndRes(hash,stream,res);
         }
     }catch(e)
     {
@@ -202,6 +210,13 @@ router.post('/postspa',function (req,res) {
     }
 });
 
+router.post('/spacontour',function (req,res) {
+
+});
+
+/**
+ * 带文字图片
+ */
 router.get('/spatext', function(req, res) {
     console.log('render/statial');
     let fnv = require('fnv-plus');
@@ -257,6 +272,7 @@ router.get('/spatext', function(req, res) {
     }
 });
 
+
 /***
  * 返回图片边界坐标
  */
@@ -292,6 +308,32 @@ router.get('/utm2lng',function (req,res) {
     res.end(lat);
 });
 
+
+let getCache = function(body){
+    //计算请求hash值
+    let hash = fnv.hash(body, 64).str();
+    //查询图片是否缓存，已缓存时直接返回hash
+    if (map.get(hash)) {
+        writeHead(res);
+        return res.end(JSON.stringify({hash:hash}));
+    }
+}
+
+/**
+ * 写入本地并返回hash
+ */
+let cacheAndRes = function(hash,stream,res){
+    let fs = require('fs');
+    let fileStream = fs.createWriteStream('pngCache/' + hash + '.png');
+    stream.pipe(fileStream);
+    map.set(hash, hash);
+    writeHead(res);
+    return res.end(JSON.stringify({hash:hash}));
+}
+
+/**
+ * 通过中心点、缩放值、图片大小获取投影
+ */
 let getProjection = function (center,scale,size) {
     let d3 = require('d3-geo');
     

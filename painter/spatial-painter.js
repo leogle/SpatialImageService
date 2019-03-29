@@ -4,12 +4,17 @@ function SpatialPainter() {
     /**
      * 初始化颜色版
      */
-    this.init = function () {
+    this.init = function (conrec) {
         try {
             let _paleCanvas = createCanvas(1, 256);
             let ctx = _paleCanvas.getContext("2d");
             let grad = ctx.createLinearGradient(0, 0, 1, 256);
-            let gradient = this._getGradientDict();
+            let gradient;
+            if(conrec) {
+                gradient = this._getContecGradientDict();
+            }else {
+                gradient = this._getGradientDict();
+            }
             for (let x in gradient) {
                 grad.addColorStop(parseFloat(x), gradient[x]);
             }
@@ -21,9 +26,9 @@ function SpatialPainter() {
         }
     };
 
-    this.paintSpatial = function (canvas, data, projection, polygons,alpha=0.5) {
+    this.paintSpatial = function (canvas, data, projection, polygons,alpha=0.5,conrec=false) {
         try {
-            this.init();
+            this.init(conrec);
             //插值
             //按照画布逐像素点着色
             if(data.min && data.max) {
@@ -119,6 +124,10 @@ function SpatialPainter() {
         }catch (e){
             console.log('paint spatial error'+e);
         }
+    };
+
+    this.paintContour = function (canvas, data, projection, polygons,alpha=0.5) {
+
     };
     /**
      * 将地理坐标数据转换成画布坐标数据
@@ -306,6 +315,25 @@ function SpatialPainter() {
         }
     };
 
+    this._getContecGradientDict = function () {
+        return {
+            0: "#00deff", //蓝色 0
+            0.099:"#00deff",
+            0.1: "#00ff32", //绿色 50
+            0.199: "#00ff32", //绿色 50
+            0.2: "#ffdc00", //黄色 100
+            0.299: "#ffdc00", //黄色 100
+            0.3: "#F06C19", //橙色 150
+            0.399: "#F06C19", //橙色 150
+            0.4: "#FF0000", //红色 200
+            0.599: "#FF0000", //红色 200
+            0.6: "#87004C", //紫色 300
+            0.799: "#87004C", //紫色 300
+            0.8: "#7E0023", //褐红 400
+            0.999: "#7E0023", //褐红 400
+            1.0: "rgb(111,4,116)"
+        };
+    };
     this._getGradientDict = function () {
         //AQI颜色标记字典(依据IAQI比例分级)
         /*
