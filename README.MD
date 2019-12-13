@@ -5,7 +5,7 @@ SpatialImageService提供了一个后台AQI渲染图片服务，服务采用Node
 ## 运行环境
 nodejs
 ## 依赖
-node-canvas\
+node-canvas(https://github.com/Automattic/node-canvas)\
 d3\
 express
 ## 配置
