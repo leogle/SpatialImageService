@@ -27,6 +27,6 @@
     "swagger-ui-dist": "^3.17.3",
     "v8debug": "^0.1.2",
     "webpage": "^0.3.0",
-    "zrender": "^3.7.4"
+    "zrender": "^5.2.1"
   }
 }
